@@ -1,12 +1,9 @@
-// Phase 2: SQLite for zero-friction local dev. Swap to postgres for prod.
-// SQLite doesn't support enums; we use String fields with the same values.
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
