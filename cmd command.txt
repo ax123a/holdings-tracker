@@ -1,0 +1,7 @@
+  # Terminal 1
+  cd C:\Users\cyrus\holdings-tracker
+  npm run dev
+
+  # Terminal 2
+  cd C:\Users\cyrus\hk-econ-dashboard
+  npx next dev -p 3001

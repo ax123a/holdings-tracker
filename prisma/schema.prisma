@@ -1,0 +1,106 @@
+// Phase 2: SQLite for zero-friction local dev. Swap to postgres for prod.
+// SQLite doesn't support enums; we use String fields with the same values.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Holder {
+  id                  String        @id @default(cuid())
+  displayCode         String        @unique
+  displayName         String
+  legalName           String
+  cik                 String?       @unique
+  sourceType          String        @default("SEC_13F")
+  latestStatus        String        @default("NONE")
+  latestReportPeriod  DateTime?
+  latestFilingDate    DateTime?
+  managerName         String?
+  managerTitle        String?
+  tracked             Boolean       @default(true)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  filings             Filing[]
+  changes             PositionChange[]
+
+  @@index([tracked])
+}
+
+model Filing {
+  id              String      @id @default(cuid())
+  holderId        String
+  accessionNumber String      @unique
+  filingType      String      @default("THIRTEEN_F_HR")
+  reportPeriod    DateTime
+  filedAt         DateTime
+  sourceUrl       String?
+  isAmendment     Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  holder          Holder      @relation(fields: [holderId], references: [id], onDelete: Cascade)
+  positions       Position[]
+  changesAsCurrent  PositionChange[] @relation("CurrentFiling")
+  changesAsPrevious PositionChange[] @relation("PreviousFiling")
+
+  @@index([holderId, reportPeriod])
+}
+
+model Security {
+  id          String   @id @default(cuid())
+  cusip       String   @unique
+  ticker      String?
+  issuerName  String
+  exchange    String?
+  country     String?
+
+  positions   Position[]
+  changes     PositionChange[]
+
+  @@index([ticker])
+}
+
+model Position {
+  id              String   @id @default(cuid())
+  filingId        String
+  securityId      String
+  shares          Float
+  valueUsd        Float
+  classTitle      String?
+  putCall         String?
+  portfolioWeight Float?
+
+  filing          Filing   @relation(fields: [filingId], references: [id], onDelete: Cascade)
+  security        Security @relation(fields: [securityId], references: [id], onDelete: Cascade)
+
+  @@index([filingId])
+  @@index([securityId])
+}
+
+model PositionChange {
+  id                String      @id @default(cuid())
+  holderId          String
+  currentFilingId   String
+  previousFilingId  String?
+  securityId        String
+  changeType        String
+  previousShares    Float?
+  currentShares     Float?
+  sharesDelta       Float?
+  previousValueUsd  Float?
+  currentValueUsd   Float?
+  valueDeltaUsd     Float?
+
+  holder            Holder    @relation(fields: [holderId], references: [id], onDelete: Cascade)
+  currentFiling     Filing    @relation("CurrentFiling", fields: [currentFilingId], references: [id], onDelete: Cascade)
+  previousFiling    Filing?   @relation("PreviousFiling", fields: [previousFilingId], references: [id], onDelete: SetNull)
+  security          Security  @relation(fields: [securityId], references: [id], onDelete: Cascade)
+
+  @@index([holderId, currentFilingId])
+  @@index([changeType])
+}
