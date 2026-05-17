@@ -90,13 +90,14 @@ export class Sec13FProvider implements HoldingsProvider {
     const rows = await prisma.holder.findMany({
       where: { tracked: true },
       orderBy: { displayCode: "asc" },
-      select: { id: true, displayCode: true, displayName: true, latestStatus: true, cik: true, managerName: true, managerTitle: true },
+      select: { id: true, displayCode: true, displayName: true, latestStatus: true, latestReportPeriod: true, cik: true, managerName: true, managerTitle: true },
     });
     const list = rows.map((h) => ({
       id: h.id,
       displayCode: h.displayCode,
       displayName: h.displayName,
       latestStatus: h.latestStatus as HolderListItem["latestStatus"],
+      latestReportPeriod: h.latestReportPeriod ? h.latestReportPeriod.toISOString().slice(0, 10) : null,
       category: (h.cik ? CIK_CATEGORY_MAP.get(h.cik) : undefined) ?? "Other",
       managerName: h.managerName,
       managerTitle: h.managerTitle,

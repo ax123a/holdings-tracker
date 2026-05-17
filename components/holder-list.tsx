@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { statusLabel } from "@/lib/diff";
 import type { HolderListItem, HolderStatus } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, formatQuarter } from "@/lib/utils";
 
 const CATEGORY_ORDER = [
   "Elite Hedge Funds",
@@ -162,9 +162,10 @@ export function HolderList({
                             statusColor(h.latestStatus)
                           )}
                         >
-                          {statusLabel(h.latestStatus) || (
-                            <span className="text-muted-foreground/40">—</span>
-                          )}
+                          {statusLabel(h.latestStatus) ||
+                            formatQuarter(h.latestReportPeriod) || (
+                              <span className="text-muted-foreground/40">—</span>
+                            )}
                         </span>
                       </button>
                     </li>

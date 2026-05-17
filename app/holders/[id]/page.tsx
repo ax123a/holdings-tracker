@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { statusLabel } from "@/lib/diff";
 import { getProvider } from "@/lib/providers";
+import { themeLabel } from "@/lib/themes";
 import type { ChangeType } from "@/lib/types";
 import {
   formatDate,
@@ -65,6 +66,25 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   const { holder, latestFiling, totalHoldings, totalValueUsd } = detail;
   const hasData = !!latestFiling;
+
+  type ThemeAgg = { count: number; valueUsd: number };
+  const themeAgg = new Map<string, ThemeAgg>();
+  for (const h of holdings) {
+    for (const t of h.themes) {
+      const cur = themeAgg.get(t) ?? { count: 0, valueUsd: 0 };
+      cur.count += 1;
+      cur.valueUsd += h.valueUsd;
+      themeAgg.set(t, cur);
+    }
+  }
+  const themePills = Array.from(themeAgg.entries())
+    .map(([slug, agg]) => ({
+      slug,
+      label: themeLabel(slug),
+      count: agg.count,
+      pct: totalValueUsd > 0 ? (agg.valueUsd / totalValueUsd) * 100 : 0,
+    }))
+    .sort((a, b) => b.pct - a.pct);
 
   return (
     <div className="space-y-4">
@@ -145,6 +165,24 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </TabsList>
 
           <TabsContent value="holdings">
+            {themePills.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {themePills.map((t) => (
+                  <span
+                    key={t.slug}
+                    className="inline-flex items-center rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-medium leading-none"
+                  >
+                    <span>{t.label}</span>
+                    <span className="ml-2 border-l border-border pl-2 text-muted-foreground num">
+                      {t.count}
+                    </span>
+                    <span className="ml-2 border-l border-border pl-2 text-muted-foreground num">
+                      {t.pct.toFixed(0)}%
+                    </span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <div className="overflow-hidden rounded-md border border-border bg-card">
               <Table>
                 <TableHeader>

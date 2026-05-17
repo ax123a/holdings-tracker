@@ -77,6 +77,7 @@ export interface HolderListItem {
   displayCode: string;
   displayName: string;
   latestStatus: HolderStatus;
+  latestReportPeriod?: string | null;
   category?: string;
   managerName?: string | null;
   managerTitle?: string | null;

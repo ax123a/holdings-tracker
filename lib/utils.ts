@@ -46,3 +46,12 @@ export function formatSignedUsd(n: number | null | undefined): string {
   const sign = n > 0 ? "+" : n < 0 ? "-" : "";
   return `${sign}$${compactNumber.format(Math.abs(n))}`;
 }
+
+export function formatQuarter(d: Date | string | null | undefined): string | null {
+  if (!d) return null;
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) return null;
+  const month = date.getUTCMonth() + 1;
+  const quarter = Math.ceil(month / 3);
+  return `${date.getUTCFullYear()} Q${quarter}`;
+}
