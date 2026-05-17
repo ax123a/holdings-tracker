@@ -11,13 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { HolderHoldingsTab } from "@/components/holder-holdings-tab";
 import { statusLabel } from "@/lib/diff";
 import { getProvider } from "@/lib/providers";
 import { themeLabel } from "@/lib/themes";
 import type { ChangeType } from "@/lib/types";
 import {
   formatDate,
-  formatPercent,
   formatShares,
   formatSignedShares,
   formatSignedUsd,
@@ -165,64 +165,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </TabsList>
 
           <TabsContent value="holdings">
-            {themePills.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {themePills.map((t) => (
-                  <span
-                    key={t.slug}
-                    className="inline-flex items-center rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-medium leading-none"
-                  >
-                    <span>{t.label}</span>
-                    <span className="ml-2 border-l border-border pl-2 text-muted-foreground num">
-                      {t.count}
-                    </span>
-                    <span className="ml-2 border-l border-border pl-2 text-muted-foreground num">
-                      {t.pct.toFixed(0)}%
-                    </span>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            <div className="overflow-hidden rounded-md border border-border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[90px]">Ticker</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead className="text-right">Shares</TableHead>
-                    <TableHead className="text-right">Market value</TableHead>
-                    <TableHead className="text-right">Portfolio %</TableHead>
-                    <TableHead className="text-right">First seen</TableHead>
-                    <TableHead className="text-right">Last report</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {holdings.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
-                        No holdings in the latest filing.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    holdings.map((h, i) => (
-                      <TableRow key={`${h.cusip}-${h.ticker ?? "x"}-${i}`}>
-                        <TableCell className="font-mono text-xs">
-                          {h.ticker ?? <span className="text-muted-foreground">—</span>}
-                        </TableCell>
-                        <TableCell className="max-w-[280px] truncate">{h.issuerName}</TableCell>
-                        <TableCell className="num text-right">{formatShares(h.shares)}</TableCell>
-                        <TableCell className="num text-right">{formatUsd(h.valueUsd)}</TableCell>
-                        <TableCell className="num text-right">
-                          {formatPercent(h.portfolioWeight)}
-                        </TableCell>
-                        <TableCell className="num text-right">{formatDate(h.firstSeen)}</TableCell>
-                        <TableCell className="num text-right">{formatDate(h.lastReport)}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <HolderHoldingsTab holdings={holdings} themePills={themePills} />
           </TabsContent>
 
           <TabsContent value="changes">
